@@ -25,7 +25,6 @@
 """
 
 # All import statements for Gujarati પંચાંગ - ચોઘડિયા
-import platform
 import sys
 from datetime import datetime as dt
 
@@ -255,11 +254,12 @@ def calculate(sunrise_datetime, sunset_datetime, next_sunrise_datetime):
 
 
 def calculate_for_specific_time(sunrise_datetime, sunset_datetime, next_sunrise_datetime, given_time):
+    vaar = "{:%a}".format(sunrise_datetime)
     x = calculate(sunrise_datetime, sunset_datetime, next_sunrise_datetime)
     for key, val in x.items():
         for subkey, subval in val.items():
             if subval['S'] <= given_time <= subval['E']:
-                result = key, subkey, subval['N'], subval['S'], subval['E']
+                result = vaar, key, subkey, subval['N'], subval['S'], subval['E']
                 return result
     return None
 

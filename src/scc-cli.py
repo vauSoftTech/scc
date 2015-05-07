@@ -53,7 +53,7 @@ def date_type_validation(argument):
 
 def time_type_validation(argument):
     try:
-        return dttm.strptime(argument, "%X")
+        return dttm.strptime(argument, "%H:%M")
     except ValueError:
         raise ap.ArgumentTypeError("Not a valid time: '{0}'.".format(argument))
 
@@ -61,39 +61,56 @@ def time_type_validation(argument):
 def main(da, db, dc, dat):
     import scc
     x = scc.calculate_for_specific_time(da, db, dc, dat)
-    print("{} {} {} {:%Y%m%d%H%M%S} {:%Y%m%d%H%M%S}".
-          format(x[0], x[1], x[2], x[3], x[4]))
+    print("{} {} {} {} {:%Y%m%d%H%M} {:%H:%M} {:%Y%m%d%H%M}".
+          format(x[0], x[1], x[2], x[3], x[4], dat, x[5]))
     return
 
 
 if __name__ == '__main__':
-    scc_cli_parser = ap.ArgumentParser(description='Parser for SCC-CLI.',
-                                       prog='SCC')
-    scc_cli_parser.add_argument('--version', action='version',
+    scc_cli_parser = ap.ArgumentParser(prog='SCC',
+                                       usage='%(prog)s [options]',
+                                       description='Simple Choghadiya Calculator.',
+                                       epilog="Simple and easy way to calculate "
+                                              "Choghadiya that is part of Sanaatan "
+                                              "Panchang."
+                                       )
+    scc_cli_parser.add_argument('-v', '--version', action='version',
                                 version='%(prog)s 0.0.1 (Unstable Alpha)')
-    scc_cli_parser.add_argument('-d', "--date",
-                                help="Date - format YYYY-MM-DD",
-                                required=True,
-                                type=date_type_validation)
-    scc_cli_parser.add_argument("--sunrise",
-                                help="Sunrise Time - format HH:MM:SS",
-                                required=True,
-                                type=time_type_validation)
-    scc_cli_parser.add_argument("--sunset",
-                                help="Sunset Time - format HH:MM:SS",
-                                required=True,
-                                type=time_type_validation)
-    scc_cli_parser.add_argument("--next-sunrise",
-                                help="Next Sunrise Time - format HH:MM:SS",
-                                required=True,
-                                type=time_type_validation)
+
+    date_group = scc_cli_parser.add_argument_group('date_group', 'Date Group')
+    date_group.add_argument('-d', "--date",
+                            help="Date - format YYYY-MM-DD",
+                            required=False,
+                            type=date_type_validation,
+                            default="{:%Y-%m-%d}".format(dttm.today()))
+
+    events_group = scc_cli_parser.add_argument_group('events_group',
+                                                     'Sun related events Group')
+    events_group.add_argument("--sunrise",
+                              help="Sunrise Time - format HH:MM",
+                              required=True,
+                              type=time_type_validation)
+    events_group.add_argument("--sunset",
+                              help="Sunset Time - format HH:MM",
+                              required=True,
+                              type=time_type_validation)
+    events_group.add_argument("--next-sunrise",
+                              help="Next Sunrise Time - format HH:MM",
+                              required=False,
+                              type=time_type_validation)
     scc_cli_parser.add_argument("--calc-at",
-                                help="Calc for Time - format HH:MM:SS",
-                                required=True,
-                                type=time_type_validation)
+                                help="Calc for Time - format HH:MM",
+                                required=False,
+                                type=time_type_validation,
+                                default="{:%H:%M}".format(dttm.now().time()))
     args = scc_cli_parser.parse_args()
+
+    if args.next_sunrise is None:
+        args.next_sunrise = args.sunrise
+
     d1 = args.sunrise.replace(args.date.year, args.date.month, args.date.day)
     d2 = args.sunset.replace(args.date.year, args.date.month, args.date.day)
+
     d3 = args.next_sunrise.replace(args.date.year, args.date.month,
                                    args.date.day) + td(days=1)
     d4 = args.calc_at.replace(args.date.year, args.date.month, args.date.day)
