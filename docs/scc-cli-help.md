@@ -48,7 +48,7 @@ The result tells us that when the script was run at 7 in the morning on 7th May 
 Now suppose at the same time you want to check which Choghadiyu will be running at noon exactly at 12:30 on the same day, you can find it out in following way.
 ```bash
 >>> scc-cli.py --sunrise=06:03 --sunset=19:10 --calc-at=12:30
->>> Thu D 4 Chal 201505071058 07:00 201505071236
+>>> Thu D 4 Chal 201505071058 12:30:00 201505071236
 ```
 That tells us that *Chal* Choghadiyu will be running at 12:30 on that day, and it was going to last only for next 6 minutes.
 
