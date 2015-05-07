@@ -24,7 +24,8 @@
 
 """
 from pathlib import Path
-
+from datetime import datetime as dttm
+import argparse as ap
 """
     In reference to this article, here mimicking Java is avoided 
     by avoiding creation of "Singleton Class". 
@@ -33,6 +34,7 @@ from pathlib import Path
     That insightful article is here... 
     https://dirtsimple.org/2004/12/python-is-not-java.html
 """
+
 
 ################################################################################
 #
@@ -118,6 +120,28 @@ def running_from_scripts_own_folder(script_name):
 
 def get_absolute_path_to_subfolder(script_path, subfolder_name):
     return script_path / subfolder_name
+
+
+################################################################################
+#
+# COMMAND LINE ARGUMENTS VALIDATOR
+#
+################################################################################
+def date_type_validation(argument):
+    try:
+        return dttm.strptime(argument, "%Y-%m-%d")
+    except ValueError:
+        raise ap.ArgumentTypeError("Not a valid date: '{0}'.".format(argument))
+
+
+def time_type_validation(argument):
+    try:
+        return dttm.strptime(argument, "%H:%M:%S")
+    except ValueError:
+        try:
+            return dttm.strptime(argument, "%H:%M")
+        except ValueError:
+            raise ap.ArgumentTypeError("Not a valid time: '{0}'.".format(argument))
 
 
 def main():

@@ -25,7 +25,7 @@
 """
 import argparse as ap
 from datetime import datetime as dttm
-
+import vau
 import scc
 
 
@@ -46,21 +46,21 @@ def input_number(txt_msg, min_no, max_no, default_no):
     return result
 
 
-def date_type_validation(argument):
-    try:
-        return dttm.strptime(argument, "%Y-%m-%d")
-    except ValueError:
-        raise ap.ArgumentTypeError("Not a valid date: '{0}'.".format(argument))
-
-
-def time_type_validation(argument):
-    try:
-        return dttm.strptime(argument, "%H:%M:%S")
-    except ValueError:
-        try:
-            return dttm.strptime(argument, "%H:%M")
-        except ValueError:
-            raise ap.ArgumentTypeError("Not a valid time: '{0}'.".format(argument))
+# def date_type_validation(argument):
+#     try:
+#         return dttm.strptime(argument, "%Y-%m-%d")
+#     except ValueError:
+#         raise ap.ArgumentTypeError("Not a valid date: '{0}'.".format(argument))
+#
+#
+# def time_type_validation(argument):
+#     try:
+#         return dttm.strptime(argument, "%H:%M:%S")
+#     except ValueError:
+#         try:
+#             return dttm.strptime(argument, "%H:%M")
+#         except ValueError:
+#             raise ap.ArgumentTypeError("Not a valid time: '{0}'.".format(argument))
 
 
 def main(gd, srt, sst, nsrt, gt):
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     date_group.add_argument('-d', "--date",
                             help="Date - format YYYY-MM-DD",
                             required=False,
-                            type=date_type_validation,
+                            type=vau.date_type_validation,
                             default="{:%Y-%m-%d}".format(dttm.today()))
 
     events_group = scc_cli_parser.add_argument_group('events_group',
@@ -94,19 +94,19 @@ if __name__ == '__main__':
     events_group.add_argument("--sunrise",
                               help="Sunrise Time - format HH:MM[:SS]",
                               required=True,
-                              type=time_type_validation)
+                              type=vau.time_type_validation)
     events_group.add_argument("--sunset",
                               help="Sunset Time - format HH:MM[:SS]",
                               required=True,
-                              type=time_type_validation)
+                              type=vau.time_type_validation)
     events_group.add_argument("--next-sunrise",
                               help="Next Sunrise Time - format HH:MM[:SS]",
                               required=False,
-                              type=time_type_validation)
+                              type=vau.time_type_validation)
     scc_cli_parser.add_argument("--calc-at",
                                 help="Calc for Time - format HH:MM[:SS]",
                                 required=False,
-                                type=time_type_validation,
+                                type=vau.time_type_validation,
                                 default="{:%H:%M:%S}".format(dttm.now().time()))
     args = scc_cli_parser.parse_args()
 
