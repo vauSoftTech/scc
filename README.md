@@ -1,7 +1,7 @@
 # Simple Choghadiya Calculator (SCC)
 
 * scc.py
-Primary routine that handles Choghadiya Calculation.
+Primary routine that handles the Choghadiya Calculation.
   [Read detailed documentation](docs/scc-help.md) about how to use this script.
 
 * scc-cli.py

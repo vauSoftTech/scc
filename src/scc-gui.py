@@ -133,7 +133,18 @@ class CSSApp(Frame):
         mb.showinfo(title, message)
         return
 
+    def disable_all_btn(self):
+        self.calc_full_btn.config(state='disabled')
+        self.calc_btn.config(state='disabled')
+        return
+
+    def enable_all_btn(self):
+        self.calc_btn.config(state='normal')
+        self.calc_full_btn.config(state='normal')
+        return
+
     def calculate_full(self):
+        self.disable_all_btn()
         d1 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
                   self.sr.get.hour, self.sr.get.minute, self.sr.get.second)
         # print(d1)
@@ -148,9 +159,11 @@ class CSSApp(Frame):
         self.show_message("Calculate for ...", txt)
         answer = scc.calculate(d1, d2, d3)
         self.show_message("Result ...", repr(answer))
+        self.enable_all_btn()
         return
 
     def calculate(self):
+        self.disable_all_btn()
         d1 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
                   self.sr.get.hour, self.sr.get.minute, self.sr.get.second)
         # print(d1)
@@ -180,6 +193,7 @@ It started at {5:%X} and will last till {6:%X}.
         """.format(d4, *answer)
         self.show_message("Result ...", text_ans)
         self.cf.set(dttm.now())
+        self.enable_all_btn()
         return
 
 
