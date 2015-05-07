@@ -5,7 +5,7 @@
     Copyright    : 2015 May. A. R. Bhatt.
     Organization : VAU SoftTech
     Project      : SCC
-    Script Name  : scc.py
+    Script Name  : scc-cli.py
     License      : GNU General Public License v3.0
 
 
@@ -53,15 +53,19 @@ def date_type_validation(argument):
 
 def time_type_validation(argument):
     try:
-        return dttm.strptime(argument, "%H:%M")
+        return dttm.strptime(argument, "%H:%M:%S")
     except ValueError:
-        raise ap.ArgumentTypeError("Not a valid time: '{0}'.".format(argument))
+        try:
+            return dttm.strptime(argument, "%H:%M")
+        except ValueError:
+            raise ap.ArgumentTypeError("Not a valid time: '{0}'.".format(argument))
 
 
 def main(da, db, dc, dat):
     import scc
     x = scc.calculate_for_specific_time(da, db, dc, dat)
-    print("{} {} {} {} {:%Y%m%d%H%M} {:%H:%M} {:%Y%m%d%H%M}".
+
+    print("{} {} {} {} {:%Y%m%d%H%M} {:%H:%M:%S} {:%Y%m%d%H%M}".
           format(x[0], x[1], x[2], x[3], x[4], dat, x[5]))
     return
 
@@ -87,22 +91,22 @@ if __name__ == '__main__':
     events_group = scc_cli_parser.add_argument_group('events_group',
                                                      'Sun related events Group')
     events_group.add_argument("--sunrise",
-                              help="Sunrise Time - format HH:MM",
+                              help="Sunrise Time - format HH:MM[:SS]",
                               required=True,
                               type=time_type_validation)
     events_group.add_argument("--sunset",
-                              help="Sunset Time - format HH:MM",
+                              help="Sunset Time - format HH:MM[:SS]",
                               required=True,
                               type=time_type_validation)
     events_group.add_argument("--next-sunrise",
-                              help="Next Sunrise Time - format HH:MM",
+                              help="Next Sunrise Time - format HH:MM[:SS]",
                               required=False,
                               type=time_type_validation)
     scc_cli_parser.add_argument("--calc-at",
-                                help="Calc for Time - format HH:MM",
+                                help="Calc for Time - format HH:MM[:SS]",
                                 required=False,
                                 type=time_type_validation,
-                                default="{:%H:%M}".format(dttm.now().time()))
+                                default="{:%H:%M:%S}".format(dttm.now().time()))
     args = scc_cli_parser.parse_args()
 
     if args.next_sunrise is None:
