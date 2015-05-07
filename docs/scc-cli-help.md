@@ -1,4 +1,5 @@
-# SCC Command Line Interface
+# Simple Choghadiya Calculator
+## Command Line Interface (scc-cli.py)
 **scc-cli.py** provides *command line interface* for **scc.py**. Following is documentation for Command Line Arguments that needs to be provided to this script in order to get the result.
 
 **--date**

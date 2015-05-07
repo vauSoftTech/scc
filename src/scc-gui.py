@@ -71,14 +71,14 @@ class CSSApp(Frame):
             container.cf.grid(row=4, column=0, padx=50, pady=(0, 5), sticky=W)
 
             container.calc_full_btn = Button(container, text=" Calculate Choghadiya for full day",
-                                        command=container.calculate_full)
+                                             command=container.calculate_full)
             container.calc_full_btn.grid(row=0, column=1, rowspan=4, padx=5, pady=(5, 0),
-                                    sticky=W + E + S + N )
+                                         sticky=W + E + S + N)
 
             container.calc_btn = Button(container, text=" Calculate Choghadiya for this moment",
                                         command=container.calculate)
             container.calc_btn.grid(row=4, column=1, padx=5, pady=(5, 0),
-                                    sticky=W + E + S + N )
+                                    sticky=W + E + S + N)
             return
 
         if parent is not None:
@@ -134,11 +134,11 @@ class CSSApp(Frame):
         return
 
     def calculate_full(self):
-        d1 = dttm( self.de.get.year, self.de.get.month, self.de.get.day,
-                   self.sr.get.hour, self.sr.get.minute, self.sr.get.second)
+        d1 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
+                  self.sr.get.hour, self.sr.get.minute, self.sr.get.second)
         # print(d1)
-        d2 = dttm( self.de.get.year, self.de.get.month, self.de.get.day,
-                   self.ss.get.hour, self.ss.get.minute, self.ss.get.second)
+        d2 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
+                  self.ss.get.hour, self.ss.get.minute, self.ss.get.second)
         # print(d2)
         d3 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
                   self.nsr.get.hour, self.nsr.get.minute, self.nsr.get.second)
@@ -151,18 +151,18 @@ class CSSApp(Frame):
         return
 
     def calculate(self):
-        d1 = dttm( self.de.get.year, self.de.get.month, self.de.get.day,
-                   self.sr.get.hour, self.sr.get.minute, self.sr.get.second)
+        d1 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
+                  self.sr.get.hour, self.sr.get.minute, self.sr.get.second)
         # print(d1)
-        d2 = dttm( self.de.get.year, self.de.get.month, self.de.get.day,
-                   self.ss.get.hour, self.ss.get.minute, self.ss.get.second)
+        d2 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
+                  self.ss.get.hour, self.ss.get.minute, self.ss.get.second)
         # print(d2)
         d3 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
                   self.nsr.get.hour, self.nsr.get.minute, self.nsr.get.second)
         d3 = d3 + td(days=1)
 
-        d4 = dttm( self.de.get.year, self.de.get.month, self.de.get.day,
-                   self.cf.get.hour, self.cf.get.minute, self.cf.get.second)
+        d4 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
+                  self.cf.get.hour, self.cf.get.minute, self.cf.get.second)
 
         d5 = d3.replace(hour=0, minute=0, second=0)
 
@@ -177,7 +177,7 @@ class CSSApp(Frame):
 
         text_ans = """Currently, at {0:%X}, on {1:} {4:} Choghadiyu is running. 
 It started at {5:%X} and will last till {6:%X}.
-        """.format( d4, *answer)
+        """.format(d4, *answer)
         self.show_message("Result ...", text_ans)
         self.cf.set(dttm.now())
         return

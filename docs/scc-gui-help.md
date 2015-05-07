@@ -1,1 +1,2 @@
-# SCC Graphics User Interface
+# Simple Choghadiya Calculator
+## Graphical User Interface (scc-gui.py)
