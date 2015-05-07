@@ -145,52 +145,28 @@ class CSSApp(Frame):
 
     def calculate_full(self):
         self.disable_all_btn()
-        d1 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
-                  self.sr.get.hour, self.sr.get.minute, self.sr.get.second)
-        # print(d1)
-        d2 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
-                  self.ss.get.hour, self.ss.get.minute, self.ss.get.second)
-        # print(d2)
-        d3 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
-                  self.nsr.get.hour, self.nsr.get.minute, self.nsr.get.second)
-        d3 = d3 + td(days=1)
-        # print(d3)
-        txt = "{} {}, {}".format(d1, d2, d3)
-        self.show_message("Calculate for ...", txt)
-        answer = scc.calculate(d1, d2, d3)
+        d1 = self.de.get
+        d2 = self.sr.get
+        d3 = self.ss.get
+        d4 = self.nsr.get
+        answer = scc.calculate(d1, d2, d3, d4)
         self.show_message("Result ...", repr(answer))
         self.enable_all_btn()
         return
 
     def calculate(self):
         self.disable_all_btn()
-        d1 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
-                  self.sr.get.hour, self.sr.get.minute, self.sr.get.second)
-        # print(d1)
-        d2 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
-                  self.ss.get.hour, self.ss.get.minute, self.ss.get.second)
-        # print(d2)
-        d3 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
-                  self.nsr.get.hour, self.nsr.get.minute, self.nsr.get.second)
-        d3 = d3 + td(days=1)
+        d1 = self.de.get
+        d2 = self.sr.get
+        d3 = self.ss.get
+        d4 = self.nsr.get
+        d5 = self.cf.get
 
-        d4 = dttm(self.de.get.year, self.de.get.month, self.de.get.day,
-                  self.cf.get.hour, self.cf.get.minute, self.cf.get.second)
-
-        d5 = d3.replace(hour=0, minute=0, second=0)
-
-        if d1 <= d4 < d5:
-            pass
-        else:
-            d4 = d4.replace(d5.year, d5.month, d5.day)
-
-        print(d4)
-
-        answer = scc.calculate_for_specific_time(d1, d2, d3, d4)
+        answer = scc.calculate_for_specific_time(d1, d2, d3, d4, d5)
 
         text_ans = """Currently, at {0:%X}, on {1:} {4:} Choghadiyu is running. 
 It started at {5:%X} and will last till {6:%X}.
-        """.format(d4, *answer)
+        """.format(d5, *answer)
         self.show_message("Result ...", text_ans)
         self.cf.set(dttm.now())
         self.enable_all_btn()

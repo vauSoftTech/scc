@@ -24,7 +24,9 @@
 
 """
 import argparse as ap
-from datetime import datetime as dttm, timedelta as td
+from datetime import datetime as dttm
+
+import scc
 
 
 def input_number(txt_msg, min_no, max_no, default_no):
@@ -61,12 +63,11 @@ def time_type_validation(argument):
             raise ap.ArgumentTypeError("Not a valid time: '{0}'.".format(argument))
 
 
-def main(da, db, dc, dat):
-    import scc
-    x = scc.calculate_for_specific_time(da, db, dc, dat)
+def main(gd, srt, sst, nsrt, gt):
+    x = scc.calculate_for_specific_time(gd, srt, sst, nsrt, gt)
 
     print("{} {} {} {} {:%Y%m%d%H%M} {:%H:%M:%S} {:%Y%m%d%H%M}".
-          format(x[0], x[1], x[2], x[3], x[4], dat, x[5]))
+          format(x[0], x[1], x[2], x[3], x[4], gt, x[5]))
     return
 
 
@@ -112,16 +113,8 @@ if __name__ == '__main__':
     if args.next_sunrise is None:
         args.next_sunrise = args.sunrise
 
-    d1 = args.sunrise.replace(args.date.year, args.date.month, args.date.day)
-    d2 = args.sunset.replace(args.date.year, args.date.month, args.date.day)
+    if args.calc_at is None:
+        args.calc_at = dttm.now().time()
 
-    d3 = args.next_sunrise.replace(args.date.year, args.date.month,
-                                   args.date.day) + td(days=1)
-    d4 = args.calc_at.replace(args.date.year, args.date.month, args.date.day)
-    d5 = dttm(d3.year, d3.month, d3.day, 0, 0, 0)
-    if (d1 <= d4 < d3) and (d1 <= d4 < d5):
-        pass
-    else:
-        d4 = args.calc_at.replace(d5.year, d5.month, d5.day)
-
-    main(d1, d2, d3, d4)
+    main(args.date, args.sunrise.time(), args.sunset.time(),
+         args.next_sunrise.time(), args.calc_at.time())

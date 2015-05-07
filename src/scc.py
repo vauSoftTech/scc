@@ -26,7 +26,7 @@
 
 # All import statements for Gujarati પંચાંગ - ચોઘડિયા
 import sys
-from datetime import datetime as dt
+from datetime import datetime, date, time, timedelta
 
 # Constants for the names of the Gujarati પંચાંગ - ચોઘડિયા
 CHOGHADIYU_AM: str = 'Amrut'
@@ -175,37 +175,54 @@ CHOGHADIYA_DICT = {
 }
 
 
-def calculate(sunrise_datetime, sunset_datetime, next_sunrise_datetime):
+def merge_date_and_time(give_dt, given_tm):
+    return datetime(give_dt.year, give_dt.month, give_dt.day,
+                    given_tm.hour, given_tm.minute, given_tm.second,
+                    given_tm.microsecond)
+
+
+def calculate(given_date, sunrise_time, sunset_time, next_sunrise_time):
     """
         This routine fills Choghadiya slots of CHOGHADIYA_SLOTS dictionary by
         first arriving at length of day and nigh choghadiya and then calculates
         all the choghadiya slots.
     """
-    if not isinstance(sunrise_datetime, dt):
+    if not isinstance(given_date, date):
         print("Invalid data received as sunrise datetime.", file=sys.stderr)
         sys.exit(1)
 
-    if not isinstance(sunset_datetime, dt):
+    if not isinstance(sunrise_time, time):
+        print("Invalid time received as sunrise time.", file=sys.stderr)
+        sys.exit(1)
+
+    if not isinstance(sunset_time, time):
         print("Invalid data received as sunset datetime.", file=sys.stderr)
         sys.exit(1)
 
-    if not isinstance(next_sunrise_datetime, dt):
+    if not isinstance(next_sunrise_time, time):
         print("Invalid data received as next sunrise datetime.",
               file=sys.stderr)
         sys.exit(1)
 
-    if not sunrise_datetime < sunset_datetime < next_sunrise_datetime:
+    d1 = merge_date_and_time(given_date, sunrise_time)
+    d2 = merge_date_and_time(given_date, sunset_time)
+    d3 = merge_date_and_time((given_date + timedelta(days=1)), next_sunrise_time)
+
+    if not (d1 < d2 < d3):
+        print("Sunrise, sunset and next sunrise should be in chronological "
+              "order.",
+              file=sys.stderr)
         sys.exit(1)
 
-    total_day_len = next_sunrise_datetime - sunrise_datetime
-    if total_day_len.days > 1:
-        print("Can not calculate when next sunrise datetime is more "
-              "than one day apart.",
-              file=sys.stderr)
+    total_day_len = d3 - d1
+    if total_day_len.days >= 2:
+        err = "Can not calculate when next sunrise datetime " \
+              "is more than one day apart.",
+        raise ValueError(err)
 
-    day_choghadiya_len = (sunset_datetime - sunrise_datetime) / 8
-    night_choghadiya_len = (next_sunrise_datetime - sunset_datetime) / 8
-    week_day_no = sunrise_datetime.weekday()
+    day_choghadiya_len = (d2 - d1) / 8
+    night_choghadiya_len = (d3 - d2) / 8
+    week_day_no = d1.weekday()
 
     #
     # This dictionary holds Choghadiya for a given day with their respective
@@ -236,9 +253,9 @@ def calculate(sunrise_datetime, sunset_datetime, next_sunrise_datetime):
             }
     }
 
-    dst = sunrise_datetime
+    dst = d1
     den = dst + day_choghadiya_len
-    nst = sunset_datetime
+    nst = d2
     nen = nst + night_choghadiya_len
 
     for i in range(1, 9):
@@ -253,12 +270,22 @@ def calculate(sunrise_datetime, sunset_datetime, next_sunrise_datetime):
     return slots
 
 
-def calculate_for_specific_time(sunrise_datetime, sunset_datetime, next_sunrise_datetime, given_time):
-    vaar = "{:%a}".format(sunrise_datetime)
-    x = calculate(sunrise_datetime, sunset_datetime, next_sunrise_datetime)
+def calculate_for_specific_time(given_date, sr_time, ss_time, nsr_time,
+                                given_time):
+    d1 = merge_date_and_time(given_date, sr_time)
+    d3 = merge_date_and_time((given_date + timedelta(days=1)), nsr_time)
+    d4 = merge_date_and_time(d3, time(0, 0, 0, 0))
+    d5 = merge_date_and_time(given_date, given_time)
+    if d1 <= d5 <= d4:
+        pass
+    else:
+        d5 = d5 + timedelta(days=1)
+
+    vaar = "{:%a}".format(given_date)
+    x = calculate(given_date, sr_time, ss_time, nsr_time)
     for key, val in x.items():
         for subkey, subval in val.items():
-            if subval['S'] <= given_time <= subval['E']:
+            if subval['S'] <= d5 <= subval['E']:
                 result = vaar, key, subkey, subval['N'], subval['S'], subval['E']
                 return result
     return None
