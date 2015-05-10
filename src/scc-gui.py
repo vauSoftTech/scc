@@ -26,7 +26,7 @@
 import os
 import argparse as ap
 from pathlib import Path
-from datetime import datetime as dttm, time as tm, timedelta as td
+from datetime import datetime as dttm, time as tm
 
 from tkinter import *
 from tkinter.ttk import *
@@ -36,7 +36,7 @@ from sccdateentry import DateEntry
 from scctimeentry import TimeEntry
 
 import vau
-import scc
+import choghadiya as ch
 
 
 class CSSApp(Frame):
@@ -159,7 +159,8 @@ class CSSApp(Frame):
         d2 = self.sr.get
         d3 = self.ss.get
         d4 = self.nsr.get
-        answer = scc.calculate(d1, d2, d3, d4)
+        # answer = scc.calculate(d1, d2, d3, d4)
+        answer = ch.Choghadiya(d1, d2, d3, d4)
         self.bell()
         self.show_choghadiya(answer)
         return
@@ -172,18 +173,21 @@ class CSSApp(Frame):
         d4 = self.nsr.get
         d5 = self.cf.get
 
-        answer = scc.calculate_for_specific_time(d1, d2, d3, d4, d5)
+        # answer = scc.calculate_for_specific_time(d1, d2, d3, d4, d5)
+        answer = ch.Choghadiya(d1, d2, d3, d4)
+        xch = answer.current_choghadiyu(d5)
 
-        text_ans = """Currently, at {0:%X}, on {1:} {4:} Choghadiyu is running. 
-It started at {5:%X} and will last till {6:%X}.
-        """.format(d5, *answer)
+        text_ans = """Currently, at {:%X}, on {:} {:} Choghadiyu is running. 
+It started at {:%X} and will last till {:%X}.
+        """.format(d5, answer.vedic_weekday_name, xch.ch_name,
+                   xch.start, xch.end)
         self.bell()
         self.show_message("Result ...", text_ans)
         self.cf.set(dttm.now())
         self.enable_all_btn()
         return
 
-    def show_choghadiya(self, ch_dict):
+    def show_choghadiya(self, xch):
         self.disable_all_btn()
         self.result_win = Toplevel(self.master)
         self.result_win.protocol("WM_DELETE_WINDOW", self.close_result_win)
@@ -200,29 +204,31 @@ It started at {5:%X} and will last till {6:%X}.
                            command=self.close_result_win)
         close_btn.grid(row=10, column=0, columnspan=10, sticky=(W, E))
 
-        for k, v in ch_dict.items():
-            for sk, sv in v.items():
-                this_row = sk
-                this_col = 0 if k == "D" else 6
-                this_ch_nm = sv["N"]
-                this_st_tm = "{:%X}".format(sv["S"])
-                this_en_tm = "{:%X}".format(sv["E"])
-                l1 = Label(self.result_win, text=sk)
-                l1.grid(row=this_row + 1, column=this_col,
-                        padx=(5, 0), pady=(5, 5), sticky=E)
-                l2 = Label(self.result_win, text=this_ch_nm)
-                l2.grid(row=this_row + 1, column=this_col + 1,
-                        padx=(5, 5), pady=0, sticky=W)
-                l3 = Label(self.result_win, text=this_st_tm)
-                l3.grid(row=this_row + 1, column=this_col + 2,
-                        padx=(5, 5), pady=0, sticky=E)
-                l4 = Label(self.result_win, text=this_en_tm)
-                if this_col == 0:
-                    l4.grid(row=this_row + 1, column=this_col + 3,
-                            padx=(5, 15), pady=0, sticky=W)
-                else:
-                    l4.grid(row=this_row + 1, column=this_col + 3,
-                            padx=(5, 5), pady=0, sticky=W)
+        for x in range(1, 9):
+            l1 = Label(self.result_win, text="{:>02}".format(x))
+            l1.grid(row=x, column=0, padx=(5, 0), pady=(5, 5), sticky=E)
+
+            l2 = Label(self.result_win, text=xch[x]['name'])
+            l2.grid(row=x, column=1, padx=(5, 5), pady=0, sticky=W)
+
+            l3 = Label(self.result_win, text="{:%X}".format(xch[x]['start']))
+            l3.grid(row=x, column=2, padx=(5, 5), pady=0, sticky=E)
+
+            l4 = Label(self.result_win, text="{:%X}".format(xch[x]['end']))
+            l4.grid(row=x, column=3, padx=(5, 15), pady=0, sticky=W)
+
+        for x in range(9, 17):
+            l1 = Label(self.result_win, text="{:>02}".format(x))
+            l1.grid(row=x - 8, column=6, padx=(5, 0), pady=(5, 5), sticky=E)
+
+            l2 = Label(self.result_win, text=xch[x]['name'])
+            l2.grid(row=x - 8, column=7, padx=(5, 5), pady=0, sticky=W)
+
+            l3 = Label(self.result_win, text="{:%X}".format(xch[x]['start']))
+            l3.grid(row=x - 8, column=8, padx=(5, 5), pady=0, sticky=E)
+
+            l4 = Label(self.result_win, text="{:%X}".format(xch[x]['end']))
+            l4.grid(row=x - 8, column=9, padx=(5, 15), pady=0, sticky=W)
 
         vertical_sep = Separator(self.result_win, orient=VERTICAL)
         vertical_sep.grid(row=0, column=5, rowspan=10, sticky=(N, S))
@@ -235,37 +241,38 @@ It started at {5:%X} and will last till {6:%X}.
         self.result_win.destroy()
         return
 
-    def setdate(self, new_value):
+    def set_date(self, new_value):
         if new_value is not None:
             self.de.set(new_value)
         return
 
-    def setsunrise(self, new_value):
+    def set_sunrise(self, new_value):
         if new_value is not None:
             self.sr.set(new_value)
         return
 
-    def setsunset(self, new_value):
+    def set_sunset(self, new_value):
         if new_value is not None:
             self.ss.set(new_value)
         return
 
-    def setnextsunrise(self, new_value):
+    def set_next_sunrise(self, new_value):
         if new_value is not None:
             self.nsr.set(new_value)
         return
 
-    def setcalcat(self, new_value):
+    def set_calc_at(self, new_value):
         if new_value is not None:
             self.cf.set(new_value)
 
+
 def main(arg1=None, arg2=None, arg3=None, arg4=None, arg5=None):
     app = CSSApp()
-    app.setdate(arg1)
-    app.setsunrise(arg2)
-    app.setsunset(arg3)
-    app.setnextsunrise(arg4)
-    app.setcalcat(arg5)
+    app.set_date(arg1)
+    app.set_sunrise(arg2)
+    app.set_sunset(arg3)
+    app.set_next_sunrise(arg4)
+    app.set_calc_at(arg5)
     app.run()
     return
 

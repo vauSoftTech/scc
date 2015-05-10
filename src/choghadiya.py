@@ -38,7 +38,8 @@ class Choghadiya:
 
     class Choghadiyu:
         """
-            This is inner class that represents a single Choghadiyu
+            This is inner class that represents a single Choghadiyu from a whole
+            set of Choghadiya for whole Vedic day.
         """
 
         def __init__(self, idx, start, end, ch_name):
@@ -46,6 +47,7 @@ class Choghadiya:
             #     "{:%H:%M}, {:%H:%M}, {}".format(
             #     idx, start, end, ch_name)
             # utils.log_debug(x)
+            super().__init__()
             self.idx = idx
             self.start = start
             self.end = end
@@ -63,6 +65,24 @@ class Choghadiya:
                 "{:%H:%M}-{:%H:%M}".format(self.idx, self.ch_name, self.start,
                                            self.end)
             return x
+
+        def __getitem__(self, item):
+            if item in ['name', 'start', 'end', 'ruler', "goodfor", 'type']:
+                if item == 'name':
+                    return self.ch_name
+                elif item == 'start':
+                    return self.start
+                elif item == 'end':
+                    return self.end
+                elif item == 'ruler':
+                    return ci.Info.get_ruling_planet(self.ch_name)
+                elif item == 'goodfor':
+                    return ci.Info.get_good_for(self.ch_name)
+                elif item == 'type':
+                    return ci.Info.get_type(self.ch_name)
+
+            else:
+                raise KeyError("Invalid Key :", item)
 
         def is_running_at(self, this_dttm=dttm.now()):
             return self.start <= this_dttm <= self.end
@@ -99,6 +119,10 @@ class Choghadiya:
         def gujarati_name(self):
             return ci.Info.get_gujarati_name(self.ch_name)
 
+        @property
+        def d_or_n(self):
+            return "D" if 1 <= self.idx <= 8 else "N"
+
     ############################################################################
     #
     # OUTER CLASS
@@ -113,9 +137,9 @@ class Choghadiya:
         # x = "Choghadiya __init__ start:  {:%Y-%m-%d %H:%M}," \
         #     "{:%H:%M}, """.format(sunrise_dttm, sunset_dttm)
         # utils.log_debug(x)
-
+        super().__init__()
         if next_sunrise is None:
-            next_sunrise = sunset_time
+            next_sunrise = sunrise_time
         self.st_dttm = merge_date_and_time(for_date, sunrise_time)
         self.md_dttm = merge_date_and_time(for_date, sunset_time)
         self.en_dttm = merge_date_and_time(for_date + td(days=1),
@@ -132,8 +156,22 @@ class Choghadiya:
         # utils.log_debug("Choghadiya __init__ done.")
 
     def __repr__(self):
-        return "Choghadiya({0:%Y-%m-%d}, {0:%H:%M}, {1:%H:%M}, {2:%H:%M})" \
-            .format(self.st_dttm, self.md_dttm, self.en_dttm)
+        d = " datetime.date({}, {}, {})".format(self.st_dttm.year,
+                                                self.st_dttm.month,
+                                                self.st_dttm.day)
+        t1 = "datetime.time({}, {}, {}, {})".format(self.st_dttm.hour,
+                                                    self.st_dttm.minute,
+                                                    self.st_dttm.second,
+                                                    self.st_dttm.microsecond)
+        t2 = "datetime.time({}, {}, {}, {})".format(self.md_dttm.hour,
+                                                    self.md_dttm.minute,
+                                                    self.md_dttm.second,
+                                                    self.md_dttm.microsecond)
+        t3 = "datetime.time({}, {}, {}, {})".format(self.en_dttm.hour,
+                                                    self.en_dttm.minute,
+                                                    self.en_dttm.second,
+                                                    self.en_dttm.microsecond)
+        return "Choghadiya({}, {}, {}, {})".format(d, t1, t2, t3)
 
     def __str__(self):
         return "Choghadiya for Vedic day {:%A}".format(self.st_dttm)
@@ -164,15 +202,26 @@ class Choghadiya:
         self.ready = True
         return None
 
+    def __getitem__(self, key):
+        if 1 <= key <= 16:
+            return self.get_choghadiyu(key)
+        else:
+            raise KeyError("Invalid Key :", key)
+
     def get_choghadiyu(self, idx):
         return self._ch[idx]
 
     def current_choghadiyu(self, curr_time=dttm.now()):
         if not self.ready:
             return None
+
+        xdt = dttm(self.st_dttm.year, self.st_dttm.month, self.st_dttm.day,
+                   curr_time.hour, curr_time.minute, curr_time.second,
+                   curr_time.microsecond)
+
         result = list(self.get_choghadiyu(i)
                       for i in range(1, 17)
-                      if self.get_choghadiyu(i).is_running_at(curr_time))
+                      if self.get_choghadiyu(i).is_running_at(xdt))
         return result[0] if len(result) >= 1 else None
 
     @property
@@ -220,10 +269,10 @@ class Choghadiya:
                 if self.get_choghadiyu(i).ch_type == "Inauspicious"]
 
     def print_choghadiya(self):
+        import textwrap as tw
         nw = dttm.now()
-        print(" Choghadiya for {:%Y-%b-%d} ".format(self.st_dttm).center(59, "="))
+        print(" Choghadiya for {:%d-%b-%Y} ".format(self.st_dttm).center(59, "="))
         print(" Vedic day {} ".format(self.vedic_weekday_name).center(59, "="))
-
         print(" Starts at {:%H:%M} and ends at {:%H:%M} next day "
               .format(self.first_choghadiyu_for_daytime.start,
                       self.last_choghadiyu_for_nighttime.end).center(59, "."))
@@ -237,7 +286,9 @@ class Choghadiya:
             txt2 = "It is ruled by \"{}\". ".format(ruler)
             txt3 = "It is considered good for \"{}\".".format(gdfr)
             txt = txt1 + txt2 + txt3
-            print(txt)
+            # print(txt)
+            for formatted_line in tw.wrap(txt, 59):
+                print(formatted_line)
 
         print("-" * 59)
         for i in range(1, 9):
@@ -271,8 +322,11 @@ def main():
 
     :rtype: None
     """
-    # utils.python_version_check()
-    # utils.do_not_run_this(__file__)
+    d = dttm.now().date()
+    t1 = dttm.now().replace(hour=6, minute=30)
+    t2 = dttm.now().replace(hour=18, minute=30)
+    x = Choghadiya(d, t1, t2)
+    x.print_choghadiya()
     return None
 
 

@@ -26,26 +26,26 @@
 import argparse as ap
 from datetime import datetime as dttm
 import vau
-import scc
+import choghadiya as ch
 
 
-def input_number(txt_msg, min_no, max_no, default_no):
-    try:
-        result = int(input(txt_msg))
-
-        if result < min_no:
-            print("Minimum allowed value is {}.".format(min_no))
-            result = min_no
-        if result > max_no:
-            print("Maximum allowed value is {}.".format(max_no))
-            result = max_no
-
-    except ValueError:
-        result = default_no
-
-    return result
-
-
+# def input_number(txt_msg, min_no, max_no, default_no):
+#     try:
+#         result = int(input(txt_msg))
+#
+#         if result < min_no:
+#             print("Minimum allowed value is {}.".format(min_no))
+#             result = min_no
+#         if result > max_no:
+#             print("Maximum allowed value is {}.".format(max_no))
+#             result = max_no
+#
+#     except ValueError:
+#         result = default_no
+#
+#     return result
+#
+#
 # def date_type_validation(argument):
 #     try:
 #         return dttm.strptime(argument, "%Y-%m-%d")
@@ -64,10 +64,12 @@ def input_number(txt_msg, min_no, max_no, default_no):
 
 
 def main(gd, srt, sst, nsrt, gt):
-    x = scc.calculate_for_specific_time(gd, srt, sst, nsrt, gt)
+    x = ch.Choghadiya(gd, srt, sst, nsrt)
+    y = x.current_choghadiyu(gt)
 
     print("{} {} {} {} {:%Y%m%d%H%M} {:%H:%M:%S} {:%Y%m%d%H%M}".
-          format(x[0], x[1], x[2], x[3], x[4], gt, x[5]))
+          format(x.vedic_weekday_name[:3], y.d_or_n, y.idx, y.ch_name, y.start,
+                 gt, y.end))
     return
 
 
