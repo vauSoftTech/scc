@@ -1,0 +1,2 @@
+# Release Notes
+1. Now huge dictionary from scc.py has been replaces with a Generator, and a Choghadiya class that generates Choghadiya on the fly. This should reduce memory requirements of the script as well as automatic calculation reduces the chances of data-entry mistakes.
